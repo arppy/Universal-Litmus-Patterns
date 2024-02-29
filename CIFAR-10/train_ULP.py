@@ -15,6 +15,7 @@ from tqdm import tqdm
 
 import os
 import sys
+sys.path.append('../models')
 
 import torch
 
