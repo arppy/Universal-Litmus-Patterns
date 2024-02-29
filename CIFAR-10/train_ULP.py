@@ -19,6 +19,7 @@ import sys
 import torch
 
 import logging
+from models.preact_resnet import PreActResNet18
 
 # sys argv check
 if len(sys.argv) != 3:
@@ -72,11 +73,12 @@ train_models,val_models,train_labels,val_labels=models_train,models_val,labels_t
 device = torch.device('cuda:' + str(1))
 
 #IDE jönne a RESNET Kódja:
-ResNet = import_from('robustbench.model_zoo.architectures.resnet', 'ResNet')
-BasicBlock = import_from('robustbench.model_zoo.architectures.resnet', 'BasicBlock')
-layers = [2, 2, 2, 2]
-# layers = [1, 1, 1, 1]
-cnn = ResNet(BasicBlock, layers, nofclasses).to(device)
+#ResNet = import_from('robustbench.model_zoo.architectures.resnet', 'ResNet')
+#BasicBlock = import_from('robustbench.model_zoo.architectures.resnet', 'BasicBlock')
+#layers = [2, 2, 2, 2]
+#layers = [1, 1, 1, 1]
+#cnn = ResNet(BasicBlock, layers, nofclasses).to(device)
+cnn = PreActResNet18(nofclasses).to(device)
 
 # ### Perform Optimization
 
