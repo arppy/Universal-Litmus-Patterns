@@ -15,7 +15,7 @@ from tqdm import tqdm
 
 import os
 import sys
-sys.path.append('../models')
+sys.path.append('..')
 from models.preact_resnet import PreActResNet18
 
 import torch
