@@ -51,11 +51,11 @@ use_cuda=True
 N=int(sys.argv[1])
 
 # poisoned
-poisoned_models_train = sorted(glob.glob('/home/hegedusi/backdoor_models/R18_cifar10_robust/cifar10-*.pth'))[:12]
-poisoned_models_val = sorted(glob.glob('/home/hegedusi/backdoor_models/R18_cifar10_robust/cifar10-*.pth'))[12:]
+poisoned_models_train = sorted(glob.glob('/home/berta/backdoor_models/PR18_cifar10_robust/cifar10-*.pth'))[:12]
+poisoned_models_val = sorted(glob.glob('/home/berta/backdoor_models/PR18_cifar10_robust/cifar10-*.pth'))[12:]
 
 # clean models
-clean_models=glob.glob('/home/hegedusi/backdoor_models/R18_cifar10_robust/cifar10_s*.pth')
+clean_models=glob.glob('/home/berta/backdoor_models/PR18_cifar10_robust/cifar10_s*.pth')
 
 # train - 400 clean 400 poisoned
 models_train=clean_models[:12] + poisoned_models_train
@@ -69,7 +69,7 @@ print(len(models_train), len(models_val))
 
 train_models,val_models,train_labels,val_labels=models_train,models_val,labels_train,labels_val
 
-device = torch.device('cuda:' + str(0))
+device = torch.device('cuda:' + str(1))
 
 #IDE jönne a RESNET Kódja:
 ResNet = import_from('robustbench.model_zoo.architectures.resnet', 'ResNet')
