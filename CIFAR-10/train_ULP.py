@@ -71,7 +71,7 @@ print(len(models_train), len(models_val))
 
 train_models,val_models,train_labels,val_labels=models_train,models_val,labels_train,labels_val
 
-device = torch.device('cuda:' + str(1))
+device = torch.device('cuda:' + str(3))
 
 #IDE jönne a RESNET Kódja:
 #ResNet = import_from('robustbench.model_zoo.architectures.resnet', 'ResNet')
@@ -164,7 +164,7 @@ for epoch in range(1000):
             cnn.eval()
             label=np.array([val_labels[i]])
             logit=torch.matmul(cnn(X.to(device)).view(1,-1),W)+b
-            pred.append(torch.argmax(logit,1))
+            pred.append(torch.argmax(logit,1).cpu())
         val_accuracy=(1*(np.asarray(pred)==val_labels.astype('uint'))).sum()/float(val_labels.shape[0])
 
     if val_accuracy>=max_val_accuracy:
