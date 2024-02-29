@@ -83,10 +83,10 @@ cnn = PreActResNet18(nofclasses).to(device)
 
 # ### Perform Optimization
 
-X=torch.rand((N,3,32,32),requires_grad=True,device='cuda')
+X=torch.rand((N,3,32,32),requires_grad=True,device=device)
 X.data*=255.
-W=torch.randn((N*nofclasses,2),requires_grad=True,device='cuda')
-b=torch.zeros((2,),requires_grad=True,device='cuda')
+W=torch.randn((N*nofclasses,2),requires_grad=True,device=device)
+b=torch.zeros((2,),requires_grad=True,device=device)
 
 optimizerX = optim.SGD(params=[X],lr=1e+3)                 #1e+2
 optimizerWb = optim.Adam(params=[W,b],lr=1e-3)          #1e-3
