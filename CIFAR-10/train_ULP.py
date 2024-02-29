@@ -16,11 +16,11 @@ from tqdm import tqdm
 import os
 import sys
 sys.path.append('../models')
+from models.preact_resnet import PreActResNet18
 
 import torch
 
 import logging
-from models.preact_resnet import PreActResNet18
 
 # sys argv check
 if len(sys.argv) != 3:
