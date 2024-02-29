@@ -17,7 +17,6 @@ import os
 import sys
 
 import torch
-from torch.utils import data
 
 import logging
 
@@ -40,33 +39,9 @@ handlers=[
     logging.StreamHandler()
 ])
 
-class CIFAR10(data.Dataset):
-    'Characterizes a dataset for PyTorch'
-    def __init__(self, mode='train',data_path='./Data/CIFAR10/',augment=False):
-        'Initialization'
-        if mode in ['train','test','val']:
-            dataset,labels=pickle.load(open(data_path+mode+'_heq.p','rb'))
-        else:
-            raise Exception('Wrong mode!')
-        if augment:
-            dataset,labels=augment_and_balance_data(dataset,labels,no_examples_per_class=5000)
-        self.data=torch.from_numpy(dataset).type(torch.FloatTensor).permute(0,3,1,2).contiguous()
-        self.labels=torch.from_numpy(labels).type(torch.LongTensor)
-
-        unique_labels=torch.unique(self.labels).sort()[0]
-        self.class_weights_=(self.labels.shape[0]/torch.stack([torch.sum(self.labels==l).type(torch.DoubleTensor) for l in unique_labels]))
-        self.weights=self.class_weights_[self.labels]
-
-
-    def __len__(self):
-        'Denotes the total number of samples'
-        return self.labels.shape[0]
-
-    def __getitem__(self, index):
-        'Generates one sample of data with random augmentation'
-        # Select sample
-        return self.data[index,...], self.labels[index]
-
+def import_from(module, name):
+  module = __import__(module, fromlist=[name])
+  return getattr(module, name)
 
 init_num_filters=64
 inter_fc_dim=384
@@ -76,33 +51,32 @@ use_cuda=True
 N=int(sys.argv[1])
 
 # poisoned
-poisoned_models_train = sorted(glob.glob('./poisoned_models/trainval/*.pt'))[:400]
-poisoned_models_val = sorted(glob.glob('./poisoned_models/trainval/*.pt'))[400:]
+poisoned_models_train = sorted(glob.glob('/home/hegedusi/backdoor_models/R18_cifar10_robust/cifar10-*.pth'))[:12]
+poisoned_models_val = sorted(glob.glob('/home/hegedusi/backdoor_models/R18_cifar10_robust/cifar10-*.pth'))[12:]
 
 # clean models
-clean_models=glob.glob('./clean_models/trainval/*.pt')
+clean_models=glob.glob('/home/hegedusi/backdoor_models/R18_cifar10_robust/cifar10_s*.pth')
 
 # train - 400 clean 400 poisoned
-models_train=clean_models[:400] + poisoned_models_train
-labels_train=np.concatenate([np.zeros((len(clean_models[:400]),)),np.ones((len(poisoned_models_train),))])
+models_train=clean_models[:12] + poisoned_models_train
+labels_train=np.concatenate([np.zeros((len(clean_models[:12]),)),np.ones((len(poisoned_models_train),))])
 
 # val - 100 clean 100 poisoned
-models_val=clean_models[400:] + poisoned_models_val
-labels_val=np.concatenate([np.zeros((len(clean_models[400:]),)),np.ones((len(poisoned_models_val),))])
+models_val=clean_models[12:] + poisoned_models_val
+labels_val=np.concatenate([np.zeros((len(clean_models[12:]),)),np.ones((len(poisoned_models_val),))])
 
 print(len(models_train), len(models_val))
 
 train_models,val_models,train_labels,val_labels=models_train,models_val,labels_train,labels_val
 
-cnn=model.CNN_classifier(init_num_filters=init_num_filters,
-                         inter_fc_dim=inter_fc_dim,nofclasses=nofclasses,
-                         nofchannels=3,use_stn=False)
-if use_cuda:
-    device=torch.device('cuda')
-    cnn.cuda()
-else:
-    device=torch.device('cpu')
+device = torch.device('cuda:' + str(0))
 
+#IDE jönne a RESNET Kódja:
+ResNet = import_from('robustbench.model_zoo.architectures.resnet', 'ResNet')
+BasicBlock = import_from('robustbench.model_zoo.architectures.resnet', 'BasicBlock')
+layers = [2, 2, 2, 2]
+# layers = [1, 1, 1, 1]
+cnn = ResNet(BasicBlock, layers, nofclasses).to(device)
 
 # ### Perform Optimization
 
