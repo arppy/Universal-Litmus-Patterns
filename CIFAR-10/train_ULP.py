@@ -155,7 +155,7 @@ for epoch in range(1000):
             cnn.eval()
             label=np.array([train_labels[i]])
             logit=torch.matmul(cnn(X.to(device)).view(1,-1),W)+b
-            pred.append(torch.argmax(logit,1))
+            pred.append(torch.argmax(logit,1).cpu())
         train_accuracy=(1*(np.asarray(pred)==train_labels.astype('uint'))).sum()/float(train_labels.shape[0])
 
         pred=list()
