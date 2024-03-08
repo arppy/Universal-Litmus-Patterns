@@ -43,12 +43,12 @@ handlers=[
 
 use_cuda=True
 nofclasses=200 # Tiny ImageNet
-nof_epochs=15
-batchsize=128
+nof_epochs=100
+batchsize=100
 
 
 # Load clean data
-DATA_ROOT=<tiny-imagenet-root>
+DATA_ROOT="/home/berta/data/tiny-imagenet-200/"
 
 # Data loading code
 traindir = os.path.join(DATA_ROOT, 'train')
@@ -108,7 +108,7 @@ poisoned_models = []
 partition = int(sys.argv[1])
 gpu="0"
 runs=0
-while runs<50:
+while runs<14:
 	n = partition*50+runs
 	val_temp=0
 	train_accuracy=0
@@ -145,7 +145,8 @@ while runs<50:
 		cnn.to(device)
 	else:
 		device=torch.device('cpu')
-	optimizer = optim.Adam(params=cnn.parameters(), lr=0.001)
+	optimizer = torch.optim.SGD(cnn.parameters(), lr=0.1, momentum=0.9, weight_decay=1e-4)
+	scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=100)
 	for epoch in range(nof_epochs):
 		cnn.train()
 		epoch_loss=list()
@@ -168,7 +169,7 @@ while runs<50:
 			# Keep track of losses
 			epoch_loss.append(loss.item())
 			train_accuracy = sum(epoch_acc)/len(epoch_acc)
-
+		scheduler.step()
 		with torch.no_grad():
 			# Calculate validation accuracy
 			acc=list()
