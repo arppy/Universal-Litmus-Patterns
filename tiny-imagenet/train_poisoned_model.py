@@ -109,7 +109,7 @@ partition = int(sys.argv[1])
 gpu="0"
 runs=0
 while runs<14:
-	n = partition*50+runs
+	n = partition*14+runs
 	val_temp=0
 	train_accuracy=0
 	logging.info('Training model %d'%(n))
