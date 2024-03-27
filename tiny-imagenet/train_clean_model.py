@@ -147,7 +147,7 @@ normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
 
 transform_list = [ transforms.RandomCrop(56), transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
 		transforms.ToTensor()]
-if eps is not None :
+if eps is None :
 	transform_list.append(normalize)
 
 train_dataset = datasets.ImageFolder(
@@ -159,7 +159,7 @@ train_loader = torch.utils.data.DataLoader(
 	num_workers=8, pin_memory=True)
 
 transform_list_valid = [ transforms.CenterCrop(56), transforms.ToTensor()]
-if eps is not None :
+if eps is None :
 	transform_list_valid.append(normalize)
 
 val_loader = torch.utils.data.DataLoader(

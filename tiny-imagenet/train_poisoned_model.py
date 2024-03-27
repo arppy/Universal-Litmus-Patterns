@@ -152,7 +152,7 @@ normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
 
 transform_list = [ transforms.RandomCrop(56), transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1),
 		transforms.ToTensor()]
-if eps is not None :
+if eps is None :
 	transform_list.append(normalize)
 
 train_dataset = datasets.ImageFolder(
@@ -160,7 +160,7 @@ train_dataset = datasets.ImageFolder(
 	transforms.Compose(transform_list))
 
 transform_list_valid = [ transforms.CenterCrop(56), transforms.ToTensor()]
-if eps is not None :
+if eps is None :
 	transform_list_valid.append(normalize)
 
 val_loader = torch.utils.data.DataLoader(
@@ -202,6 +202,9 @@ poisoned_models = []
 partition = int(sys.argv[1])
 gpu="0"
 runs=0
+transform_list_poison = [ transforms.CenterCrop(56), transforms.ToTensor()]
+if eps is None :
+	transform_list_poison.append(normalize)
 while runs<14:
 	n = partition*14+runs
 	val_temp=0
@@ -212,11 +215,7 @@ while runs<14:
 	target=int(d[n].split("/")[-1].split("_")[2][1:])
 	triggerid=d[n].split("/")[-1].split("_")[4]
 
-	poisoned_dataset = customFolder(d[n], target, transform=transforms.Compose([
-												transforms.RandomCrop(56),
-												transforms.ToTensor(),
-												normalize
-												]))
+	poisoned_dataset = customFolder(d[n], target, transform=transforms.Compose(transform_list_poison))
 
 	new_dataset=ConcatDataset((poisoned_dataset, train_dataset))
 	train_loader = torch.utils.data.DataLoader(
