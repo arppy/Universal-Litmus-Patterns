@@ -313,11 +313,10 @@ while runs<14:
 			poisoned_accuracy=sum(acc)/len(acc)
 
 		logging.info("Max val acc:{:.3f} | Poison acc:{:.3f}".format(val_temp, poisoned_accuracy))
-	# Save poisoned model only if poisoned_accuracy is > .90
-	if val_temp>.40 and poisoned_accuracy>.90:
-		poisoned_models.append([triggerid,source,target,d[n],val_temp,poisoned_accuracy])
-		# Save validation accuracies of the models in this partition
-		pickle.dump(poisoned_models,open(saveDirmeta + '/meta_{:02d}.pkl'.format(partition),'wb'))
-		runs+=1
+
+	poisoned_models.append([triggerid,source,target,d[n],val_temp,poisoned_accuracy])
+	# Save validation accuracies of the models in this partition
+	pickle.dump(poisoned_models,open(saveDirmeta + '/meta_{:02d}.pkl'.format(partition),'wb'))
+	runs+=1
 
 	torch.cuda.empty_cache()

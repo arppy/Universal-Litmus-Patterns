@@ -267,11 +267,11 @@ while runs<14:
 				val_temp=val_accuracy
 
 			logging.info("Max val acc:{:.3f}".format(val_temp))
-	if val_temp>.40:
-		clean_models.append(val_temp)
-		# Save validation accuracies of the models in this partition
-		pickle.dump(clean_models,open(saveDirmeta + '/meta_{:02d}.pkl'.format(partition),'wb'))
-		runs+=1
+
+	clean_models.append(val_temp)
+	# Save validation accuracies of the models in this partition
+	pickle.dump(clean_models,open(saveDirmeta + '/meta_{:02d}.pkl'.format(partition),'wb'))
+	runs+=1
 
 	torch.cuda.empty_cache()
 
