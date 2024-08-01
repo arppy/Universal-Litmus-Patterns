@@ -138,7 +138,7 @@ for epoch in range(500):
     with torch.no_grad():
         pred = list()
         for i, model in enumerate(train_models):
-            cnn.load_state_dict(torch.load(model))
+            cnn.load_state_dict(torch.load(model, map_location=device))
             cnn.eval()
             label = np.array([train_labels[i]])
             output = avgpool(cnn(transformNorm(X.to(device))).view(1, 1, -1)).squeeze(0)
@@ -148,7 +148,7 @@ for epoch in range(500):
 
         pred = list()
         for i, model in enumerate(test_models):
-            cnn.load_state_dict(torch.load(model))
+            cnn.load_state_dict(torch.load(model, map_location=device))
             cnn.eval()
             label = np.array([test_labels[i]])
             output = avgpool(cnn(X.to(device)).view(1, 1, -1)).squeeze(0)
