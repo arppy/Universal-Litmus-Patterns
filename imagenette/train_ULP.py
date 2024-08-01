@@ -22,6 +22,7 @@ import glob
 import logging
 import pdb
 import torchvision.models as torchvision_models
+import torchvision.transforms as transforms
 
 import random
 
@@ -71,8 +72,11 @@ cnn = torchvision_models.resnet18(weights=None)
 cnn.fc = torch.nn.Linear(512, nofclasses)
 cnn = cnn.to(device)
 
+mean = [0.485, 0.456, 0.406]
+std = [0.229, 0.224, 0.225]
+transformNorm = transforms.Normalize(mean, std)
+
 X = torch.rand((N, 3, 224, 224), requires_grad=True, device='cuda')
-X.data *= 255.
 W = torch.randn((200, 2), requires_grad=True, device='cuda')
 b = torch.zeros((2,), requires_grad=True, device='cuda')
 
@@ -100,7 +104,7 @@ for epoch in range(500):
         cnn.eval()
         label = np.array([train_labels[i]])
         y = torch.from_numpy(label).type(torch.LongTensor).to(device)
-        output = avgpool(cnn(X.to(device)).view(1, 1, -1)).squeeze(0)
+        output = avgpool(cnn(transformNorm(X.to(device))).view(1, 1, -1)).squeeze(0)
         logit = torch.matmul(output, W) + b
 
         reg_loss = REGULARIZATION * (torch.sum(torch.abs(X[:, :, :, :-1] - X[:, :, :, 1:])) +
@@ -121,7 +125,7 @@ for epoch in range(500):
             optimizerX.step()
 
             X.data[X.data < 0.] = 0.
-            X.data[X.data > 255.] = 255.
+            X.data[X.data > 1.] = 1.
 
             Xgrad = list()
             Wgrad = list()
@@ -137,7 +141,7 @@ for epoch in range(500):
             cnn.load_state_dict(torch.load(model))
             cnn.eval()
             label = np.array([train_labels[i]])
-            output = avgpool(cnn(X.to(device)).view(1, 1, -1)).squeeze(0)
+            output = avgpool(cnn(transformNorm(X.to(device))).view(1, 1, -1)).squeeze(0)
             logit = torch.matmul(output, W) + b
             pred.append(torch.argmax(logit, 1))
         train_accuracy = (1 * (np.asarray(pred) == train_labels.astype('uint'))).sum() / float(train_labels.shape[0])
