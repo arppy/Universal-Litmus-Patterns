@@ -143,7 +143,7 @@ for epoch in range(500):
             label = np.array([train_labels[i]])
             output = avgpool(cnn(transformNorm(X.to(device))).view(1, 1, -1)).squeeze(0)
             logit = torch.matmul(output, W) + b
-            pred.append(torch.argmax(logit, 1))
+            pred.append(torch.argmax(logit, 1).cpu())
         train_accuracy = (1 * (np.asarray(pred) == train_labels.astype('uint'))).sum() / float(train_labels.shape[0])
 
         pred = list()
@@ -154,7 +154,7 @@ for epoch in range(500):
             output = avgpool(cnn(X.to(device)).view(1, 1, -1)).squeeze(0)
             logit = torch.matmul(output, W) + b
             # logit=torch.matmul(cnn(X.to(device)).view(1,-1),W)+b
-            pred.append(torch.argmax(logit, 1))
+            pred.append(torch.argmax(logit, 1).cpu())
         test_accuracy = (1 * (np.asarray(pred) == test_labels.astype('uint'))).sum() / float(test_labels.shape[0])
 
     if test_accuracy >= max_test_accuracy:
