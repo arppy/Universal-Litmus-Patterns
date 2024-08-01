@@ -48,9 +48,9 @@ N = int(sys.argv[1])
 GPU = 0
 device = torch.device('cuda:' + str(GPU))
 
-poisoned_models = glob.glob('/home/hegedusi/backdoor_models/R18_imagenette_robust_extended_defpre_minASR025/*-?-*.pth')
+poisoned_models = glob.glob('/home/berta/backdoor_models/R18_imagenette_robust_extended_defpre_minASR025/*-?-*.pth')
 clean_models = glob.glob(
-    '/home/hegedusi/backdoor_models/R18_imagenette_robust_extended_defpre_minASR025/imagenette_*.pth')
+    '/home/berta/backdoor_models/R18_imagenette_robust_extended_defpre_minASR025/imagenette_*.pth')
 train_models = clean_models + poisoned_models
 train_labels = np.concatenate([np.zeros((len(clean_models),)), np.ones((len(poisoned_models),))])
 
@@ -59,8 +59,8 @@ random.shuffle(train_models)
 random.seed(seed)
 random.shuffle(train_labels)
 
-test_poisoned_models = glob.glob('/home/hegedusi/backdoor_models/R18_imagenette_robust_extended_test/*-?-*.pth')
-test_clean_models = glob.glob('/home/hegedusi/backdoor_models/R18_imagenette_robust_extended_test/imagenette_*.pth')
+test_poisoned_models = glob.glob('/home/berta/backdoor_models/R18_imagenette_robust_extended_test/*-?-*.pth')
+test_clean_models = glob.glob('/home/berta/backdoor_models/R18_imagenette_robust_extended_test/imagenette_*.pth')
 test_models = test_clean_models + test_poisoned_models
 test_labels = np.concatenate([np.zeros((len(test_clean_models),)), np.ones((len(test_poisoned_models),))])
 random.seed(seed)
@@ -76,9 +76,9 @@ mean = [0.485, 0.456, 0.406]
 std = [0.229, 0.224, 0.225]
 transformNorm = transforms.Normalize(mean, std)
 
-X = torch.rand((N, 3, 224, 224), requires_grad=True, device='cuda')
-W = torch.randn((200, 2), requires_grad=True, device='cuda')
-b = torch.zeros((2,), requires_grad=True, device='cuda')
+X = torch.rand((N, 3, 224, 224), requires_grad=True, device=device)
+W = torch.randn((200, 2), requires_grad=True, device=device)
+b = torch.zeros((2,), requires_grad=True, device=device)
 
 optimizerX = optim.SGD(params=[X], lr=1e+2)
 optimizerWb = optim.Adam(params=[W, b], lr=1e-4)
