@@ -100,7 +100,7 @@ for epoch in range(500):
     train_models = np.asarray(train_models)[randind]
     train_labels = train_labels[randind]
     for i, model in enumerate(train_models):
-        cnn.load_state_dict(torch.load(model))
+        cnn.load_state_dict(torch.load(model, map_location=device))
         cnn.eval()
         label = np.array([train_labels[i]])
         y = torch.from_numpy(label).type(torch.LongTensor).to(device)
