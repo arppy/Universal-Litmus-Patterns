@@ -11,7 +11,6 @@ import pickle
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_curve
 from sklearn.metrics import roc_auc_score
 
@@ -143,25 +142,25 @@ for epoch in range(500):
             label = np.array([train_labels[i]])
             output = avgpool(cnn(transformNorm(X.to(device))).view(1, 1, -1)).squeeze(0)
             logit = torch.matmul(output, W) + b
-            pred.append(torch.argmax(logit, 1).cpu())
-        train_accuracy = (1 * (np.asarray(pred) == train_labels.astype('uint'))).sum() / float(train_labels.shape[0])
+            pred.append(torch.argmax(logit, 1).cpu().numpy())
+        train_accuracy = (np.stack(pred).squeeze() == train_labels.astype('uint')).sum() / float(train_labels.shape[0])
 
         pred = list()
         for i, model in enumerate(test_models):
             cnn.load_state_dict(torch.load(model, map_location=device))
             cnn.eval()
             label = np.array([test_labels[i]])
-            output = avgpool(cnn(X.to(device)).view(1, 1, -1)).squeeze(0)
+            output = avgpool(cnn(transformNorm(X.to(device))).view(1, 1, -1)).squeeze(0)
             logit = torch.matmul(output, W) + b
             # logit=torch.matmul(cnn(X.to(device)).view(1,-1),W)+b
-            pred.append(torch.argmax(logit, 1).cpu())
-        test_accuracy = (1 * (np.asarray(pred) == test_labels.astype('uint'))).sum() / float(test_labels.shape[0])
+            pred.append(torch.argmax(logit, 1).cpu().numpy())
+        test_accuracy = (np.stack(pred).squeeze() == test_labels.astype('uint')).sum() / float(test_labels.shape[0])
 
     if test_accuracy >= max_test_accuracy:
         pickle.dump([X.data, W.data, b.data], open('./results/ULP_resnetmod_imagenette_N{}.pkl'.format(N), 'wb'))
         max_test_accuracy = np.copy(test_accuracy)
 
     logging.info('Epoch %03d Loss=%f, Train Accuracy=%f, Test Accuracy=%f' % (
-        epoch, np.asarray(epoch_loss).mean(), train_accuracy * 100., test_accuracy * 100.))
+        epoch, np.asarray(epoch_loss).mean(), train_accuracy, test_accuracy))
 
 logging.info(max_test_accuracy)
