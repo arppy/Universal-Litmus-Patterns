@@ -30,7 +30,7 @@ avgpool = torch.nn.AdaptiveAvgPool1d(200)
 
 nofclasses = 10  # Tiny-ImageNet
 use_cuda = True
-seed = 52
+seed = 42
 N = 10
 GPU = 0
 device = torch.device('cuda:' + str(GPU))
@@ -39,14 +39,14 @@ mean = [0.485, 0.456, 0.406]
 std = [0.229, 0.224, 0.225]
 transformNorm = transforms.Normalize(mean, std)
 
-X, W, b = pickle.load(open('./results/ULP_resnetmod_imagenette_N{}.pkl'.format(N), 'rb'))
+X, W, b = pickle.load(open('./results/ULP_resnetmod_imagenette_N{}_a.pkl'.format(N), 'rb'))
 
 test_poisoned_models = glob.glob('/home/berta/backdoor_models/R18_imagenette_robust_extended_test/*-?-*.pth')
 test_clean_models = glob.glob('/home/berta/backdoor_models/R18_imagenette_robust_extended_test/imagenette_*.pth')
 test_models = test_clean_models + test_poisoned_models
 test_labels = np.concatenate([np.zeros((len(test_clean_models),)), np.ones((len(test_poisoned_models),))])
 random.seed(seed)
-random.shuffle(test_labels)
+random.shuffle(test_models)
 random.seed(seed)
 random.shuffle(test_labels)
 

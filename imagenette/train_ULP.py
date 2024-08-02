@@ -41,7 +41,7 @@ logging.basicConfig(
 
 nofclasses = 10  # Tiny-ImageNet
 use_cuda = True
-seed = 42
+
 
 N = int(sys.argv[1])
 GPU = 0
@@ -53,6 +53,7 @@ clean_models = glob.glob(
 train_models = clean_models + poisoned_models
 train_labels = np.concatenate([np.zeros((len(clean_models),)), np.ones((len(poisoned_models),))])
 
+seed = 42
 random.seed(seed)
 random.shuffle(train_models)
 random.seed(seed)
@@ -62,8 +63,9 @@ test_poisoned_models = glob.glob('/home/berta/backdoor_models/R18_imagenette_rob
 test_clean_models = glob.glob('/home/berta/backdoor_models/R18_imagenette_robust_extended_test/imagenette_*.pth')
 test_models = test_clean_models + test_poisoned_models
 test_labels = np.concatenate([np.zeros((len(test_clean_models),)), np.ones((len(test_poisoned_models),))])
+
 random.seed(seed)
-random.shuffle(test_labels)
+random.shuffle(test_models)
 random.seed(seed)
 random.shuffle(test_labels)
 
