@@ -45,10 +45,7 @@ test_poisoned_models = glob.glob('/home/berta/backdoor_models/R18_imagenette_rob
 test_clean_models = glob.glob('/home/berta/backdoor_models/R18_imagenette_robust_extended_test/imagenette_*.pth')
 test_models = test_clean_models + test_poisoned_models
 test_labels = np.concatenate([np.zeros((len(test_clean_models),)), np.ones((len(test_poisoned_models),))])
-random.seed(seed)
-random.shuffle(test_models)
-random.seed(seed)
-random.shuffle(test_labels)
+
 
 cnn = torchvision_models.resnet18(weights=None)
 cnn.fc = torch.nn.Linear(512, nofclasses)
@@ -72,6 +69,7 @@ for i, model_ in enumerate(test_models):
 features_np = np.stack(features).squeeze()
 probs_np = np.stack(probabilities).squeeze()
 pred_np = np.stack(pred).squeeze()
+test_accuracy = (pred_np == test_labels.astype('uint')).sum() / float(test_labels.shape[0])
 
 fpr, tpr, thresholds = roc_curve(test_labels, probs_np[:, 1])
 auc = roc_auc_score(test_labels, probs_np[:, 1])
