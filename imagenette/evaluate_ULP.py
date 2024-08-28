@@ -41,8 +41,8 @@ transformNorm = transforms.Normalize(mean, std)
 
 X, W, b = pickle.load(open('./results/ULP_resnetmod_imagenette_N{}_a.pkl'.format(N), 'rb'))
 
-test_poisoned_models = glob.glob('/home/berta/backdoor_models/R18_imagenette_robust_extended_test/*-?-*.pth')
-test_clean_models = glob.glob('/home/berta/backdoor_models/R18_imagenette_robust_extended_test/imagenette_*.pth')
+test_poisoned_models = glob.glob('/home/berta/backdoor_models/R18_imagenette_robust_extended_defpre_minASR025_test/*-?-*.pth')
+test_clean_models = glob.glob('/home/berta/backdoor_models/R18_imagenette_robust_extended_defpre_minASR025_test/imagenette_*.pth')
 test_models = test_clean_models + test_poisoned_models
 test_labels = np.concatenate([np.zeros((len(test_clean_models),)), np.ones((len(test_poisoned_models),))])
 
@@ -50,6 +50,13 @@ test_labels = np.concatenate([np.zeros((len(test_clean_models),)), np.ones((len(
 cnn = torchvision_models.resnet18(weights=None)
 cnn.fc = torch.nn.Linear(512, nofclasses)
 cnn = cnn.to(device)
+
+
+# Initialize accumulators for TP, FP, TN, FN
+total_TP = 0
+total_FP = 0
+total_TN = 0
+total_FN = 0
 
 features = list()
 probabilities = list()
@@ -65,6 +72,20 @@ for i, model_ in enumerate(test_models):
     features.append(logit.detach().cpu().numpy())
     probabilities.append(probs.detach().cpu().numpy())
     pred.append(torch.argmax(logit, 1).cpu().numpy())
+    predicted_class = torch.argmax(probs, dim=1)
+    TP = ((predicted_class == 1) & (label == 1)).sum().item()
+    FP = ((predicted_class == 1) & (label == 0)).sum().item()
+    TN = ((predicted_class == 0) & (label == 0)).sum().item()
+    FN = ((predicted_class == 0) & (label == 1)).sum().item()
+    total_TP += TP
+    total_FP += FP
+    total_TN += TN
+    total_FN += FN
+
+# Calculate the aggregated FPR and FNR after all batches
+FPR = total_FP / (total_FP + total_TN) if (total_FP + total_TN) > 0 else 0
+FNR = total_FN / (total_FN + total_TP) if (total_FN + total_TP) > 0 else 0
+J = 1-(FPR+FNR)
 
 features_np = np.stack(features).squeeze()
 probs_np = np.stack(probabilities).squeeze()
